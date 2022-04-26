@@ -59,6 +59,9 @@ late String abiCode;
 late DeployedContract contract;
 late ContractFunction withdrawFunction;
 
+// faucet contract
+const String faucetContractAddress = "0x0e664eaB0463697c4712D062E852E3c6c9c798dd";
+
 // create contract connection
 // var client = Web3Client(rpcUrl, Client(), socketConnector: () {
 //   return IOWebSocketChannel.connect(wsUrl).cast<String>();
@@ -92,6 +95,7 @@ readContract() async {
 callWithdraw() async {
   try {
     String result = await faucet.withdraw(credentials: credentials);
+
     log('transaction result = $result');
   } catch (e) {
     log('transaction result = $e');

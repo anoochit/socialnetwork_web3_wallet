@@ -99,7 +99,7 @@ class _HomePageState extends State<HomePage> {
                 // update
                 updateBalance();
               },
-              child: const Text("Recieve"),
+              child: const Text("Wallet QR Code"),
             ),
 
             ElevatedButton(
