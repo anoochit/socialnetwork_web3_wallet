@@ -34,6 +34,9 @@ class SignInPage extends StatelessWidget {
                   appController.getUser(uid: state.user!.uid);
                 }),
               ),
+              AuthStateChangeAction<AuthState>((context, state) {
+                log('x = $state');
+              }),
               AuthStateChangeAction<UserCreated>(
                 ((context, state) {
                   log("User created in Firebase Auth ${state.credential.user!.uid} ");
@@ -51,6 +54,7 @@ class SignInPage extends StatelessWidget {
         }
 
         // user already signin goto home page
+        appController.getUser(uid: FirebaseAuth.instance.currentUser!.uid);
         return HomePage();
       },
     );

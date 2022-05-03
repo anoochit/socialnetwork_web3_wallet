@@ -8,6 +8,7 @@ import 'package:snwallet/models/post.dart';
 
 import 'package:bip39/bip39.dart' as bip39;
 import 'package:dart_bip32_bip44/dart_bip32_bip44.dart';
+import 'package:web3dart/web3dart.dart';
 
 class AppController extends GetxController {
   RxString uid = "".obs;
@@ -76,8 +77,20 @@ class AppController extends GetxController {
   }
 
   // create wallet
-  walletCreate() {
-    final mnemonic = bip39.generateMnemonic();
-    log('mnemonic = $mnemonic');
+  createWallet() {
+    // generate mnemonic
+    String mnemonic = bip39.generateMnemonic(); // seed word
+
+    String seed = bip39.mnemonicToSeedHex(mnemonic);
+
+    Chain chain = Chain.seed(seed);
+    ExtendedKey privateKey = chain.forPath("m/44'/60'/0'/0/0");
+    Credentials credentials = EthPrivateKey.fromHex(privateKey.privateKeyHex());
+
+    // get wallet address
+    credentials.extractAddress().then((value) => log('address = ${value.hex}'));
   }
+
+  // send coin
+  sendCoin({required String to, required double amount}) {}
 }
