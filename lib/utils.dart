@@ -2,21 +2,15 @@
 import 'dart:developer';
 //import 'dart:math' as math;
 
+import 'package:dart_bip32_bip44/dart_bip32_bip44.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart';
 import 'package:snwallet/faucet.g.dart';
 import 'package:web3dart/web3dart.dart';
 
+import 'package:bip39/bip39.dart' as bip39;
+
 import 'const.dart';
-
-// create new wallet from random, this should save in sharedpreference
-
-// var random = math.Random.secure();
-// Credentials credentialFromRandom = EthPrivateKey.createRandom(random);
-
-// Future<EthereumAddress> createNewWallet() async {
-//   return await credentialFromRandom.extractAddress();
-// }
 
 // connect to rpc server
 const String rpcUrl = "http://10.0.2.2:7545";
@@ -100,4 +94,28 @@ callWithdraw() async {
   } catch (e) {
     log('transaction result = $e');
   }
+}
+
+// create new wallet from mnemonic
+EthPrivateKey createNewWallet() {
+  // random mnemonic
+  //var mnemonic = bip39.generateMnemonic();
+
+  // use static mnemonic
+  var mnemonic = "robot title put fiber injury resemble copper crop hockey angry manual purchase";
+  log('mnemonic = $mnemonic');
+
+  // create seed
+  String seed = bip39.mnemonicToSeedHex(mnemonic);
+
+  // create credentials from seed
+  Chain chain = Chain.seed(seed);
+  ExtendedKey privateKey = chain.forPath("m/44'/60'/0'/0/0");
+  EthPrivateKey credentials = EthPrivateKey.fromHex(privateKey.privateKeyHex()); //web3dart
+
+  // show address
+  //var address = await credentials.extractAddress();
+  //log('address = ${address.hex}');
+
+  return credentials;
 }

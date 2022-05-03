@@ -1,8 +1,10 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:snwallet/const.dart';
-import 'package:snwallet/pages/recieve.dart';
+import 'package:get/get.dart';
+import 'package:snwallet/controllers/app_controller.dart';
+import 'package:snwallet/pages/feed.dart';
+import 'package:snwallet/pages/profile.dart';
 import 'package:snwallet/utils.dart';
 import 'package:web3dart/web3dart.dart';
 
@@ -14,103 +16,96 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  String? _walletAddress;
-  EtherAmount _walletBalance = EtherAmount.zero();
+  // String? _walletAddress;
+  // EtherAmount _walletBalance = EtherAmount.zero();
+
+  int _currentIndex = 0;
+  final List<String> _listTitle = ["Feed", "Chat", "Notification", "Profile"];
+
+  AppController appController = Get.find<AppController>();
 
   @override
   void initState() {
     super.initState();
-
     // get wallet address and balance
-    updateWallet();
-
+    //updateWallet();
     // connect contract
-    readContract();
+    //readContract();
   }
 
   // update ui wallet
-  updateWallet() {
-    getWalletAddress().then((address) {
-      log('Wallet Address = ${address.hex}');
-      getBalance().then((balance) {
-        log('Balance = ${balance.getInEther}');
-        setState(() {
-          _walletAddress = address.hex;
-          _walletBalance = balance;
-          currentWallet = address;
-        });
-      });
-    });
-  }
+  // updateWallet() {
+  //   getWalletAddress().then((address) {
+  //     log('Wallet Address = ${address.hex}');
+  //     getBalance().then((balance) {
+  //       log('Balance = ${balance.getInEther}');
+  //       setState(() {
+  //         _walletAddress = address.hex;
+  //         _walletBalance = balance;
+  //         currentWallet = address;
+  //       });
+  //     });
+  //   });
+  // }
 
   // update ui balance
-  updateBalance() {
-    getBalance().then((balance) {
-      log('Balance = ${balance.getInEther}');
-      setState(() {
-        _walletBalance = balance;
-      });
-    });
-  }
+  // updateBalance() {
+  //   getBalance().then((balance) {
+  //     log('Balance = ${balance.getInEther}');
+  //     setState(() {
+  //       _walletBalance = balance;
+  //     });
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Wallet"),
+        title: Text(_listTitle[_currentIndex]),
       ),
-      body: SafeArea(
-        minimum: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // get wallet address
-            Text('Wallet = ${_walletAddress}'),
-            Text('Balance = ${_walletBalance.getInEther}'),
-
-            // update balance
-            ElevatedButton(
-              onPressed: () {
-                // update
-                updateBalance();
-              },
-              child: const Text("Refresh"),
-            ),
-
-            // send coin
-            ElevatedButton(
-              onPressed: () {
-                sendCoin(toAddress: wallet1, amount: 1);
-              },
-              child: const Text("Send 1 ETH"),
-            ),
-
-            // recieve token
-            ElevatedButton(
-              onPressed: () {
-                // show qrcode
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => RecievePage(walletAddress: _walletAddress),
-                    fullscreenDialog: true,
-                  ),
-                );
-
-                // update
-                updateBalance();
-              },
-              child: const Text("Wallet QR Code"),
-            ),
-
-            ElevatedButton(
-              onPressed: () {
-                callWithdraw();
-              },
-              child: const Text("Faucet"),
-            ),
-          ],
-        ),
+      body: IndexedStack(
+        index: _currentIndex,
+        children: [
+          // feed
+          FeedPage(),
+          // chat
+          Container(),
+          // notification
+          Container(),
+          // profile
+          ProfilePage(),
+        ],
       ),
+      bottomNavigationBar: NavigationBar(
+          selectedIndex: _currentIndex,
+          onDestinationSelected: (index) {
+            setState(() {
+              _currentIndex = index;
+            });
+          },
+          destinations: const [
+            NavigationDestination(
+              icon: Icon(Icons.home_outlined),
+              selectedIcon: Icon(Icons.home),
+              label: 'Feed',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.chat_outlined),
+              selectedIcon: Icon(Icons.chat),
+              label: 'Chat',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.notifications_outlined),
+              selectedIcon: Icon(Icons.notifications),
+              label: 'Notification',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.account_circle_outlined),
+              selectedIcon: Icon(Icons.account_circle),
+              label: 'Profile',
+            ),
+          ]),
     );
   }
 }
