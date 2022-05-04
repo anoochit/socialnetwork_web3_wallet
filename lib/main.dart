@@ -18,6 +18,8 @@ Future<void> main() async {
   runApp(MyApp());
 }
 
+// mnemonic = scale habit artwork bag mail electric demand section evoke cost promote wonder
+
 class MyApp extends StatelessWidget {
   MyApp({Key? key}) : super(key: key);
 

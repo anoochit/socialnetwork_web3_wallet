@@ -14,6 +14,8 @@ class CreateWalletPage extends StatefulWidget {
 class _CreateWalletPageState extends State<CreateWalletPage> {
   AppController appController = Get.find<AppController>();
 
+  TextEditingController seedTextController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,9 +30,9 @@ class _CreateWalletPageState extends State<CreateWalletPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   // Instruction
-                  (appController.seed.isEmpty)
-                      ? Text("You can create new wallet")
-                      : Text("Please backup your seed words in the safe place."),
+                  // (appController.seed.isEmpty)
+                  //     ? Text("You can create new wallet")
+                  //     : Text("Please backup your seed words in the safe place."),
 
                   // menonic code
                   (appController.seed.isNotEmpty)
@@ -52,7 +54,7 @@ class _CreateWalletPageState extends State<CreateWalletPage> {
                           onPressed: () {
                             FlutterClipboard.copy('${appController.seed}').then((value) {
                               ScaffoldMessenger.of(context)
-                                  .showSnackBar(const SnackBar(content: Text("Copyed seed words to clipboard")));
+                                  .showSnackBar(const SnackBar(content: Text("Copied seed words to clipboard")));
                             });
                             Get.back();
                           },
@@ -65,10 +67,7 @@ class _CreateWalletPageState extends State<CreateWalletPage> {
                           onPressed: () {
                             appController.walletExist().then((exist) {
                               // if wallet exist
-                              if (exist) {
-                                // load wallet data
-
-                              } else {
+                              if (!exist) {
                                 // create new wallet
                                 appController.createWallet();
                               }
@@ -83,6 +82,35 @@ class _CreateWalletPageState extends State<CreateWalletPage> {
                       ? ElevatedButton(
                           onPressed: () {
                             // show dialog with text input
+                            showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return AlertDialog(
+                                    title: Text("Import Wallet"),
+                                    content: TextFormField(
+                                      controller: seedTextController,
+                                      decoration: InputDecoration(hintText: 'paste your seed words'),
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          // create wallet with seed words
+                                          appController.createWallet(mnemonic: seedTextController.text.trim());
+                                          // go back
+                                          Get.back(closeOverlays: true);
+                                        },
+                                        child: Text("Import"),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          // go back
+                                          Get.back(closeOverlays: true);
+                                        },
+                                        child: Text("Cancel"),
+                                      ),
+                                    ],
+                                  );
+                                });
                           },
                           child: Text("Import Wallet"),
                         )

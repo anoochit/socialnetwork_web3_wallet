@@ -9,6 +9,7 @@ import 'package:snwallet/models/post.dart';
 
 import 'package:bip39/bip39.dart' as bip39;
 import 'package:dart_bip32_bip44/dart_bip32_bip44.dart';
+import 'package:web3dart/web3dart.dart' as web3;
 import 'package:web3dart/web3dart.dart';
 import 'package:web_socket_channel/io.dart';
 
@@ -27,6 +28,7 @@ class AppController extends GetxController {
   // rpc server
   final String _rpcUrl = "http://10.0.2.2:7545";
   final String _wsUrl = 'ws://10.0.2.2:8545';
+  final String _blockExplorer = 'http://10.0.2.2:4000';
 
   // Create user data in FireStore
   createUser({required String uid, required String displayName}) {
@@ -95,14 +97,15 @@ class AppController extends GetxController {
   }
 
   // create wallet
-  createWallet() {
-    // generate mnemonic
-    String mnemonic = bip39.generateMnemonic(); // seed word
-    String seed = bip39.mnemonicToSeedHex(mnemonic);
-
-    Chain chain = Chain.seed(seed);
+  createWallet({String? mnemonic}) {
+    if (mnemonic == null) {
+      // generate mnemonic
+      mnemonic = bip39.generateMnemonic(); // seed word
+    }
+    String seedHex = bip39.mnemonicToSeedHex(mnemonic);
+    Chain chain = Chain.seed(seedHex);
     ExtendedKey privateKey = chain.forPath("m/44'/60'/0'/0/0");
-    EthPrivateKey credentials = EthPrivateKey.fromHex(privateKey.privateKeyHex());
+    web3.EthPrivateKey credentials = web3.EthPrivateKey.fromHex(privateKey.privateKeyHex());
 
     // save to encrypted share preference
     encryptedSharedPreferences = EncryptedSharedPreferences();
@@ -110,22 +113,24 @@ class AppController extends GetxController {
     // get wallet address
     credentials.extractAddress().then((address) {
       log('seed = ${mnemonic}');
-      encryptedSharedPreferences.setString("seed", mnemonic);
+      encryptedSharedPreferences.setString("seed", mnemonic!);
 
       log('address = ${address.hex}');
       encryptedSharedPreferences.setString("wallet", address.hex);
 
       this.seed.value = mnemonic;
       this.wallet.value = address.hex;
+
+      getWalletData();
+
       update();
     });
   }
 
-  late String _seedHex;
-  late Chain _chain;
-  late ExtendedKey _privateKey;
-  late EthPrivateKey _credentials;
-  late Web3Client _ethClient;
+  late String seedHex;
+  late Chain chain;
+  late ExtendedKey privateKey;
+  late web3.EthPrivateKey credentials;
 
   // load wallet data
   Future<void> getWalletData() async {
@@ -140,23 +145,50 @@ class AppController extends GetxController {
       this.wallet.value = wallet;
       this.seed.value = seed;
 
-      _seedHex = bip39.mnemonicToSeedHex(this.seed.value);
-      _chain = Chain.seed(_seedHex);
-      _privateKey = _chain.forPath("m/44'/60'/0'/0/0");
-      _credentials = EthPrivateKey.fromHex(_privateKey.privateKeyHex());
+      seedHex = bip39.mnemonicToSeedHex(this.seed.value);
+      chain = Chain.seed(seedHex);
+      privateKey = chain.forPath("m/44'/60'/0'/0/0");
+      credentials = web3.EthPrivateKey.fromHex(privateKey.privateKeyHex());
 
       update();
     });
   }
 
+  // walletShortFormat
+  getWalletShortFormat({required String wallet}) {
+    var first = wallet.substring(0, 5);
+    var last = wallet.substring(wallet.length - 5, wallet.length);
+    return first + "..." + last;
+  }
+
   // get coin balance
-  Stream<EtherAmount> getCoinBalance() {
-    _ethClient = Web3Client(_rpcUrl, Client(), socketConnector: () {
-      return IOWebSocketChannel.connect(_wsUrl).cast<String>();
-    });
-    return _ethClient.getBalance(_credentials.address).asStream();
+  // Stream<web3.EtherAmount> getCoinBalance() {
+  //   web3.Web3Client ethClient = web3.Web3Client(_rpcUrl, Client());
+  //   return Stream.fromFuture(ethClient.getBalance(credentials.address));
+  // }
+
+  Future<EtherAmount> getCoinBalance() async {
+    web3.Web3Client ethClient = web3.Web3Client(_rpcUrl, Client());
+    return await ethClient.getBalance(credentials.address);
   }
 
   // send coin
-  sendCoin({required String to, required double amount}) {}
+  sendCoin({required String to, required double amount}) async {
+    web3.Web3Client ethClient = web3.Web3Client(_rpcUrl, Client(), socketConnector: () {
+      return IOWebSocketChannel.connect(_wsUrl).cast<String>();
+    });
+    var result = await ethClient.sendTransaction(
+      credentials,
+      web3.Transaction(
+        to: web3.EthereumAddress.fromHex(to),
+        gasPrice: web3.EtherAmount.inWei(BigInt.one),
+        maxGas: 100000,
+        value: web3.EtherAmount.fromUnitAndValue(web3.EtherUnit.ether, BigInt.from(amount)),
+      ),
+    );
+
+    log('transaction result = $result');
+
+    return result;
+  }
 }
