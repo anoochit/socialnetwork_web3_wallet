@@ -30,9 +30,7 @@ class _CreateWalletPageState extends State<CreateWalletPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   // Instruction
-                  // (appController.seed.isEmpty)
-                  //     ? Text("You can create new wallet")
-                  //     : Text("Please backup your seed words in the safe place."),
+                  (appController.seed.isNotEmpty) ? Text("Please backup your seed words in safe place.") : Container(),
 
                   // menonic code
                   (appController.seed.isNotEmpty)
@@ -65,11 +63,11 @@ class _CreateWalletPageState extends State<CreateWalletPage> {
                   (appController.seed.isEmpty)
                       ? ElevatedButton(
                           onPressed: () {
-                            appController.walletExist().then((exist) {
+                            appController.walletExist().then((exist) async {
                               // if wallet exist
                               if (!exist) {
                                 // create new wallet
-                                appController.createWallet();
+                                await appController.createWallet();
                               }
                             });
                           },
@@ -93,9 +91,9 @@ class _CreateWalletPageState extends State<CreateWalletPage> {
                                     ),
                                     actions: [
                                       TextButton(
-                                        onPressed: () {
+                                        onPressed: () async {
                                           // create wallet with seed words
-                                          appController.createWallet(mnemonic: seedTextController.text.trim());
+                                          await appController.createWallet(mnemonic: seedTextController.text.trim());
                                           // go back
                                           Get.back(closeOverlays: true);
                                         },

@@ -29,6 +29,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
+      themeMode: ThemeMode.dark,
       home: SignInPage(),
       routes: {
         '/home': (context) => HomePage(),

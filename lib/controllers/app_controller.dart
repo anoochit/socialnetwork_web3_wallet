@@ -3,8 +3,10 @@ import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:encrypted_shared_preferences/encrypted_shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart';
+import 'package:snwallet/faucet.g.dart';
 import 'package:snwallet/models/post.dart';
 
 import 'package:bip39/bip39.dart' as bip39;
@@ -20,19 +22,19 @@ class AppController extends GetxController {
   RxString seed = "".obs;
   RxString wallet = "".obs;
 
-  final FirebaseFirestore _firebase = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore firebase = FirebaseFirestore.instance;
+  final FirebaseAuth auth = FirebaseAuth.instance;
 
   late EncryptedSharedPreferences encryptedSharedPreferences;
 
   // rpc server
-  final String _rpcUrl = "http://10.0.2.2:7545";
-  final String _wsUrl = 'ws://10.0.2.2:8545';
-  final String _blockExplorer = 'http://10.0.2.2:4000';
+  final String rpcUrl = "http://10.0.2.2:7545";
+  final String wsUrl = 'ws://10.0.2.2:8545';
+  final String blockExplorer = 'http://10.0.2.2:4000';
 
   // Create user data in FireStore
   createUser({required String uid, required String displayName}) {
-    _firebase.collection('users').doc(uid).set({
+    firebase.collection('users').doc(uid).set({
       'uid': uid,
       'displayName': displayName,
       'type': 'u',
@@ -48,26 +50,26 @@ class AppController extends GetxController {
 
   // Update user data in FireStore
   updateUser({required String displayName}) {
-    _firebase.collection('users').doc(_auth.currentUser!.uid).update({
+    firebase.collection('users').doc(auth.currentUser!.uid).update({
       'displayName': displayName,
       'updated': DateTime.now(),
     }).then((value) {
       // set user data
-      this.uid.value = _auth.currentUser!.uid;
+      this.uid.value = auth.currentUser!.uid;
       this.displayName.value = displayName;
       update();
     });
   }
 
   updateUserWallet({required String wallet}) {
-    _firebase.collection('users').doc(_auth.currentUser!.uid).update({
+    firebase.collection('users').doc(auth.currentUser!.uid).update({
       'wallet': wallet,
     });
   }
 
   // Get user data in FireStore
   getUser({required String uid}) {
-    _firebase.collection('users').doc(uid).get().then((user) {
+    firebase.collection('users').doc(uid).get().then((user) {
       log('user docId =' + user.id);
       // set user data
       this.uid.value = user['uid'];
@@ -78,7 +80,7 @@ class AppController extends GetxController {
 
   // Post stream
   CollectionReference<Post> getPostStream() {
-    return _firebase.collection('posts').withConverter<Post>(
+    return firebase.collection('posts').withConverter<Post>(
           fromFirestore: (snapshot, _) => Post.fromJson(snapshot.data()!),
           toFirestore: (post, _) => post.toJson(),
         );
@@ -96,41 +98,39 @@ class AppController extends GetxController {
     }
   }
 
+  late String seedHex;
+  late Chain chain;
+  late ExtendedKey privateKey;
+  late web3.EthPrivateKey credentials;
+
   // create wallet
-  createWallet({String? mnemonic}) {
+  createWallet({String? mnemonic}) async {
     if (mnemonic == null) {
       // generate mnemonic
       mnemonic = bip39.generateMnemonic(); // seed word
     }
-    String seedHex = bip39.mnemonicToSeedHex(mnemonic);
-    Chain chain = Chain.seed(seedHex);
-    ExtendedKey privateKey = chain.forPath("m/44'/60'/0'/0/0");
-    web3.EthPrivateKey credentials = web3.EthPrivateKey.fromHex(privateKey.privateKeyHex());
+    seedHex = bip39.mnemonicToSeedHex(mnemonic);
+    chain = Chain.seed(seedHex);
+    privateKey = chain.forPath("m/44'/60'/0'/0/0");
+    credentials = web3.EthPrivateKey.fromHex(privateKey.privateKeyHex());
 
     // save to encrypted share preference
     encryptedSharedPreferences = EncryptedSharedPreferences();
 
     // get wallet address
-    credentials.extractAddress().then((address) {
-      log('seed = ${mnemonic}');
-      encryptedSharedPreferences.setString("seed", mnemonic!);
+    final address = await credentials.extractAddress();
 
-      log('address = ${address.hex}');
-      encryptedSharedPreferences.setString("wallet", address.hex);
+    log('seed = ${mnemonic}');
+    encryptedSharedPreferences.setString("seed", mnemonic);
 
-      this.seed.value = mnemonic;
-      this.wallet.value = address.hex;
+    log('address = ${address.hex}');
+    encryptedSharedPreferences.setString("wallet", address.hex);
 
-      getWalletData();
+    this.seed.value = mnemonic;
+    this.wallet.value = address.hex;
 
-      update();
-    });
+    update();
   }
-
-  late String seedHex;
-  late Chain chain;
-  late ExtendedKey privateKey;
-  late web3.EthPrivateKey credentials;
 
   // load wallet data
   Future<void> getWalletData() async {
@@ -163,19 +163,19 @@ class AppController extends GetxController {
 
   // get coin balance
   // Stream<web3.EtherAmount> getCoinBalance() {
-  //   web3.Web3Client ethClient = web3.Web3Client(_rpcUrl, Client());
+  //   web3.Web3Client ethClient = web3.Web3Client(rpcUrl, Client());
   //   return Stream.fromFuture(ethClient.getBalance(credentials.address));
   // }
 
   Future<EtherAmount> getCoinBalance() async {
-    web3.Web3Client ethClient = web3.Web3Client(_rpcUrl, Client());
+    web3.Web3Client ethClient = web3.Web3Client(rpcUrl, Client());
     return await ethClient.getBalance(credentials.address);
   }
 
   // send coin
   sendCoin({required String to, required double amount}) async {
-    web3.Web3Client ethClient = web3.Web3Client(_rpcUrl, Client(), socketConnector: () {
-      return IOWebSocketChannel.connect(_wsUrl).cast<String>();
+    web3.Web3Client ethClient = web3.Web3Client(rpcUrl, Client(), socketConnector: () {
+      return IOWebSocketChannel.connect(wsUrl).cast<String>();
     });
     var result = await ethClient.sendTransaction(
       credentials,
@@ -190,5 +190,44 @@ class AppController extends GetxController {
     log('transaction result = $result');
 
     return result;
+  }
+
+  // faucet contract
+  late String abiCode;
+  late DeployedContract contract;
+  late ContractFunction withdrawFunction;
+
+  final String faucetContractAddress = "0x0e664eaB0463697c4712D062E852E3c6c9c798dd";
+  late EthereumAddress contractAddr;
+  late Faucet faucet;
+
+  readFaucetContract() async {
+    // get abi
+    abiCode = await rootBundle.loadString('lib/faucet.abi.json');
+
+    // get contract
+    contractAddr = EthereumAddress.fromHex(faucetContractAddress);
+    contract = DeployedContract(ContractAbi.fromJson(abiCode, 'Faucet'), contractAddr);
+
+    // set contract function
+    withdrawFunction = contract.function('withdraw');
+
+    // connect to contract
+    final Web3Client ethClient = Web3Client(rpcUrl, Client());
+    faucet = Faucet(address: contractAddr, client: ethClient);
+
+    // listen for event
+    // faucet.withdrawalEvents().take(1).listen((event) {
+    //   log('Sent 1 ETH to ${event.to}');
+    // });
+  }
+
+  callFaucetWithdraw() async {
+    try {
+      String result = await faucet.withdraw(credentials: credentials);
+      log('transaction result = $result');
+    } catch (e) {
+      log('transaction result = $e');
+    }
   }
 }
