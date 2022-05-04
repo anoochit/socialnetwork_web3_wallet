@@ -32,11 +32,10 @@ class SignInPage extends StatelessWidget {
                   log('User id = ${state.user!.uid}');
                   // load user info
                   appController.getUser(uid: state.user!.uid);
+                  // if wallet exist load wallet
+                  appController.getWalletData();
                 }),
               ),
-              AuthStateChangeAction<AuthState>((context, state) {
-                log('x = $state');
-              }),
               AuthStateChangeAction<UserCreated>(
                 ((context, state) {
                   log("User created in Firebase Auth ${state.credential.user!.uid} ");
@@ -53,8 +52,11 @@ class SignInPage extends StatelessWidget {
           );
         }
 
-        // user already signin goto home page
+        // load user data when already login
         appController.getUser(uid: FirebaseAuth.instance.currentUser!.uid);
+        // if wallet exist load wallet
+        appController.getWalletData();
+        // user already signin goto home page
         return HomePage();
       },
     );

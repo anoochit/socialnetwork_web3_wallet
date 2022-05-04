@@ -5,6 +5,7 @@ import 'package:snwallet/controllers/app_controller.dart';
 import 'package:snwallet/pages/create_wallet.dart';
 import 'package:snwallet/pages/home.dart';
 import 'package:snwallet/pages/signin.dart';
+import 'package:snwallet/pages/wallet.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {
@@ -31,6 +32,7 @@ class MyApp extends StatelessWidget {
         '/home': (context) => HomePage(),
         '/signin': (context) => SignInPage(),
         '/create_wallet': (context) => CreateWalletPage(),
+        '/wallet': (context) => WalletPage(),
       },
     );
   }

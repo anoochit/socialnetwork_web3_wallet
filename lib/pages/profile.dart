@@ -50,7 +50,7 @@ class ProfilePage extends StatelessWidget {
                   appController.walletExist().then((walletExist) {
                     if (walletExist) {
                       // exist goto wallet page
-
+                      Get.toNamed('/wallet');
                     } else {
                       // not exist create one
                       Get.toNamed('/create_wallet');
