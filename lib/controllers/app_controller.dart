@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:encrypted_shared_preferences/encrypted_shared_preferences.dart';
+import 'package:ethers/ethers.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -173,21 +174,22 @@ class AppController extends GetxController {
   }
 
   // send coin
-  sendCoin({required String to, required double amount}) async {
+  Future<String> sendCoin({required String to, required String amount}) async {
     web3.Web3Client ethClient = web3.Web3Client(rpcUrl, Client(), socketConnector: () {
       return IOWebSocketChannel.connect(wsUrl).cast<String>();
     });
-    var result = await ethClient.sendTransaction(
+
+    final result = await ethClient.sendTransaction(
       credentials,
       web3.Transaction(
         to: web3.EthereumAddress.fromHex(to),
         gasPrice: web3.EtherAmount.inWei(BigInt.one),
         maxGas: 100000,
-        value: web3.EtherAmount.fromUnitAndValue(web3.EtherUnit.ether, BigInt.from(amount)),
+        value: web3.EtherAmount.fromUnitAndValue(web3.EtherUnit.wei, ethers.utils.parseEther(amount)),
       ),
     );
 
-    log('transaction result = $result');
+    log('transaction result = $result ');
 
     return result;
   }

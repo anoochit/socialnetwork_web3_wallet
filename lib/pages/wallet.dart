@@ -21,7 +21,7 @@ class _WalletPageState extends State<WalletPage> {
   late Timer timer;
   EtherAmount _balance = EtherAmount.zero();
 
-  final oCcy = NumberFormat("#,##0.00", "en_US");
+  final fmt = NumberFormat("#,##0.00", "en_US");
 
   @override
   void initState() {
@@ -58,7 +58,7 @@ class _WalletPageState extends State<WalletPage> {
             padding: const EdgeInsets.all(16.0),
             child: Center(
               child: Text(
-                oCcy.format(_balance.getValueInUnit(EtherUnit.ether)),
+                fmt.format(_balance.getValueInUnit(EtherUnit.ether)),
                 style: Theme.of(context).textTheme.headline2,
               ),
             ),
@@ -104,8 +104,11 @@ class _WalletPageState extends State<WalletPage> {
           ListTile(
             leading: Icon(Icons.currency_exchange),
             title: Text("Send ETH"),
-            onTap: () {
+            onTap: () async {
               log("Send Coin");
+              final result =
+                  await appController.sendCoin(to: '0x57ceAFF4353D196ebD5f72f88dc62C1E9A37aF8f', amount: '0.5');
+              log('send coint = $result');
             },
           ),
           // send Clam Token
