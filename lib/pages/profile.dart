@@ -59,6 +59,13 @@ class ProfilePage extends StatelessWidget {
                 },
               ),
 
+              // clear local data
+              ListTile(
+                leading: const Icon(Icons.exit_to_app),
+                title: const Text("Clear wallet data"),
+                onTap: () => appController.walletClear(),
+              ),
+
               // signout
               ListTile(
                 leading: const Icon(Icons.exit_to_app),

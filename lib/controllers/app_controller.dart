@@ -56,12 +56,13 @@ class AppController extends GetxController {
       'updated': DateTime.now(),
     }).then((value) {
       // set user data
-      this.uid.value = auth.currentUser!.uid;
+      uid.value = auth.currentUser!.uid;
       this.displayName.value = displayName;
       update();
     });
   }
 
+  // update user wallet
   updateUserWallet({required String wallet}) {
     firebase.collection('users').doc(auth.currentUser!.uid).update({
       'wallet': wallet,
@@ -74,7 +75,7 @@ class AppController extends GetxController {
       log('user docId =' + user.id);
       // set user data
       this.uid.value = user['uid'];
-      this.displayName.value = user['displayName'];
+      displayName.value = user['displayName'];
       update();
     });
   }
@@ -85,6 +86,16 @@ class AppController extends GetxController {
           fromFirestore: (snapshot, _) => Post.fromJson(snapshot.data()!),
           toFirestore: (post, _) => post.toJson(),
         );
+  }
+
+  // clear wallet data
+  walletClear() async {
+    encryptedSharedPreferences.clear().then((value) {
+      log("Wallet clear");
+      wallet.value = '';
+      seed.value = '';
+      update();
+    });
   }
 
   // check wallet exist
@@ -106,10 +117,7 @@ class AppController extends GetxController {
 
   // create wallet
   createWallet({String? mnemonic}) async {
-    if (mnemonic == null) {
-      // generate mnemonic
-      mnemonic = bip39.generateMnemonic(); // seed word
-    }
+    mnemonic ??= bip39.generateMnemonic();
     seedHex = bip39.mnemonicToSeedHex(mnemonic);
     chain = Chain.seed(seedHex);
     privateKey = chain.forPath("m/44'/60'/0'/0/0");
@@ -121,12 +129,16 @@ class AppController extends GetxController {
     // get wallet address
     final address = await credentials.extractAddress();
 
-    log('seed = ${mnemonic}');
+    log('seed = $mnemonic');
     encryptedSharedPreferences.setString("seed", mnemonic);
 
     log('address = ${address.hex}');
     encryptedSharedPreferences.setString("wallet", address.hex);
 
+    // update to firestore
+    this.updateUserWallet(wallet: address.hex);
+
+    // update data
     this.seed.value = mnemonic;
     this.wallet.value = address.hex;
 
@@ -163,14 +175,18 @@ class AppController extends GetxController {
   }
 
   // get coin balance
-  // Stream<web3.EtherAmount> getCoinBalance() {
-  //   web3.Web3Client ethClient = web3.Web3Client(rpcUrl, Client());
-  //   return Stream.fromFuture(ethClient.getBalance(credentials.address));
-  // }
-
   Future<EtherAmount> getCoinBalance() async {
     web3.Web3Client ethClient = web3.Web3Client(rpcUrl, Client());
     return await ethClient.getBalance(credentials.address);
+  }
+
+  // get coin balance stream
+  Stream<EtherAmount> getCoinBalanceStream() async* {
+    while (true) {
+      await Future.delayed(const Duration(seconds: 5));
+      EtherAmount balance = await getCoinBalance();
+      yield balance;
+    }
   }
 
   // send coin
@@ -224,12 +240,14 @@ class AppController extends GetxController {
     // });
   }
 
-  callFaucetWithdraw() async {
+  Future<String> callFaucetWithdraw() async {
     try {
       String result = await faucet.withdraw(credentials: credentials);
       log('transaction result = $result');
+      return result;
     } catch (e) {
       log('transaction result = $e');
+      return '$e';
     }
   }
 }

@@ -24,26 +24,6 @@ class _WalletPageState extends State<WalletPage> {
   final fmt = NumberFormat("#,##0.00", "en_US");
 
   @override
-  void initState() {
-    super.initState();
-
-    // FIXME
-    timer = Timer.periodic(const Duration(seconds: 3), (callback) {
-      appController.getCoinBalance().then((value) {
-        setState(() {
-          _balance = value;
-        });
-      });
-    });
-  }
-
-  @override
-  void dispose() {
-    timer.cancel();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -57,10 +37,18 @@ class _WalletPageState extends State<WalletPage> {
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Center(
-              child: Text(
-                fmt.format(_balance.getValueInUnit(EtherUnit.ether)),
-                style: Theme.of(context).textTheme.headline2,
-              ),
+              child: StreamBuilder<EtherAmount>(
+                  stream: appController.getCoinBalanceStream(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      EtherAmount _balance = snapshot.data!;
+                      return Text(
+                        fmt.format(_balance.getValueInUnit(EtherUnit.ether)),
+                        style: Theme.of(context).textTheme.headline2,
+                      );
+                    }
+                    return CircularProgressIndicator();
+                  }),
             ),
           ),
 
@@ -92,6 +80,7 @@ class _WalletPageState extends State<WalletPage> {
               await appController.callFaucetWithdraw();
             },
           ),
+
           // swap ETH with Clam Coin
           ListTile(
             leading: Icon(Icons.currency_exchange),
@@ -100,6 +89,7 @@ class _WalletPageState extends State<WalletPage> {
               log("Buy Clam Token");
             },
           ),
+
           // send coin
           ListTile(
             leading: Icon(Icons.currency_exchange),
