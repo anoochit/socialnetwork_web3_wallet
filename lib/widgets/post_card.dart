@@ -12,11 +12,9 @@ import 'package:snwallet/widgets/displayname.dart';
 class PostCard extends StatelessWidget {
   PostCard({
     Key? key,
-    required this.created,
     required this.post,
   }) : super(key: key);
 
-  final DateTime created;
   final QueryDocumentSnapshot<PostModel> post;
 
   final AppController appController = Get.find<AppController>();
@@ -24,6 +22,10 @@ class PostCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // get created date
+    final created = DateTime.fromMicrosecondsSinceEpoch(
+      post["created"].microsecondsSinceEpoch,
+    );
     return Card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -86,7 +88,7 @@ class PostCard extends StatelessWidget {
                           context: context,
                           builder: (context) {
                             return AlertDialog(
-                              title: const Text("Donate 0.1 ETH"),
+                              title: const Text("Donate"),
                               content: Text(
                                 'Do you want to donate 0.1 ETH to ${user['displayName']} ?',
                               ),

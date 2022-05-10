@@ -16,7 +16,7 @@ class FeedPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: FirestoreQueryBuilder<PostModel>(
-          query: postController.getPostStream(),
+          query: postController.getPostStream().orderBy('updated', descending: true),
           builder: (context, snapshot, _) {
             // is loading
             if (snapshot.isFetching) {
@@ -45,11 +45,8 @@ class FeedPage extends StatelessWidget {
                 if (snapshot.hasData) {
                   // get post item
                   final post = snapshot.docs[index];
-                  // get created date
-                  final created = DateTime.fromMicrosecondsSinceEpoch(
-                    post["created"].microsecondsSinceEpoch,
-                  );
-                  return PostCard(created: created, post: post);
+
+                  return PostCard(post: post);
                 }
 
                 return const Center(child: CircularProgressIndicator());
