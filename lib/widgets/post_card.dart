@@ -24,6 +24,7 @@ class PostCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // top post box
           Row(

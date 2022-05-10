@@ -59,6 +59,6 @@ class AppController extends GetxController {
   }
 
   Future<DocumentSnapshot> getUserData({required String uid}) async {
-    return await firestore.collection("users").doc(uid).get(const GetOptions(source: Source.cache));
+    return await firestore.collection("users").doc(uid).get();
   }
 }
