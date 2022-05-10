@@ -72,7 +72,7 @@ class _WalletPageState extends State<WalletPage> {
 
           // get ETH fron Faucet contract
           ListTile(
-            leading: const Icon(Icons.currency_bitcoin_outlined),
+            leading: const Icon(Icons.attach_money),
             title: const Text("Get ETH from Faucet"),
             onTap: () async {
               log("Faucet");
@@ -81,27 +81,37 @@ class _WalletPageState extends State<WalletPage> {
             },
           ),
 
-          // swap ETH with Clam Coin
-          ListTile(
-            leading: const Icon(Icons.currency_exchange),
-            title: const Text("Swap CLAM Token"),
-            onTap: () {
-              log("Buy Clam Token");
-            },
-          ),
-
           // send coin
           ListTile(
-            leading: const Icon(Icons.currency_exchange),
+            leading: const Icon(Icons.attach_money),
             title: const Text("Send ETH"),
             onTap: () async {
               log("Send Coin");
-              final result =
-                  await walletController.sendCoin(to: '0x57ceAFF4353D196ebD5f72f88dc62C1E9A37aF8f', amount: '0.5');
-              log('send coint = $result');
+              final result = await walletController.sendCoin(
+                to: '0x57ceAFF4353D196ebD5f72f88dc62C1E9A37aF8f',
+                amount: '0.5',
+              );
+              log('result = $result');
             },
           ),
-          // send Clam Token
+
+          // swap ETH with Clam Coin
+          ListTile(
+            leading: const Icon(Icons.currency_exchange),
+            title: const Text("Swap GIFT Token"),
+            onTap: () {
+              log("Swap GIFT Token, call swap contract to swap ETH and GIFT token");
+            },
+          ),
+
+          // send GIFT Token
+          ListTile(
+            leading: const Icon(Icons.redeem),
+            title: const Text("Send GIFT"),
+            onTap: () async {
+              log("Send GIFT");
+            },
+          ),
         ],
       ),
     );

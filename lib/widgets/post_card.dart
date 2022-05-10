@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -81,10 +83,12 @@ class PostCard extends StatelessWidget {
                 ),
                 label: const Text("Donate"),
               ),
+
               // donate post
               TextButton.icon(
                 onPressed: () {
                   // donate post
+                  log("send gift token");
                 },
                 icon: const Icon(
                   Icons.redeem,
