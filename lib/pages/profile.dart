@@ -4,9 +4,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:snwallet/controllers/app_controller.dart';
+import 'package:snwallet/controllers/wallet_controller.dart';
 
 class ProfilePage extends StatelessWidget {
   ProfilePage({Key? key}) : super(key: key);
+
+  WalletController walletController = Get.find<WalletController>();
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +50,7 @@ class ProfilePage extends StatelessWidget {
                 title: const Text("Wallet"),
                 onTap: () {
                   // check user already has wallet if not just create one
-                  appController.walletExist().then((walletExist) {
+                  walletController.walletExist().then((walletExist) {
                     if (walletExist) {
                       // exist goto wallet page
                       Get.toNamed('/wallet');
@@ -63,7 +66,7 @@ class ProfilePage extends StatelessWidget {
               ListTile(
                 leading: const Icon(Icons.exit_to_app),
                 title: const Text("Clear wallet data"),
-                onTap: () => appController.walletClear(),
+                onTap: () => walletController.walletClear(),
               ),
 
               // signout

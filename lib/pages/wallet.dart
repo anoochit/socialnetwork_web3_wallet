@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:developer';
 
 import 'package:clipboard/clipboard.dart';
@@ -6,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:snwallet/controllers/app_controller.dart';
+import 'package:snwallet/controllers/faucet_controller.dart';
+import 'package:snwallet/controllers/wallet_controller.dart';
 import 'package:web3dart/web3dart.dart';
 
 class WalletPage extends StatefulWidget {
@@ -17,9 +18,8 @@ class WalletPage extends StatefulWidget {
 
 class _WalletPageState extends State<WalletPage> {
   AppController appController = Get.find<AppController>();
-
-  late Timer timer;
-  EtherAmount _balance = EtherAmount.zero();
+  WalletController walletController = Get.find<WalletController>();
+  FaucetContractController faucetContractController = Get.find<FaucetContractController>();
 
   final fmt = NumberFormat("#,##0.00", "en_US");
 
@@ -38,7 +38,7 @@ class _WalletPageState extends State<WalletPage> {
             padding: const EdgeInsets.all(16.0),
             child: Center(
               child: StreamBuilder<EtherAmount>(
-                  stream: appController.getCoinBalanceStream(),
+                  stream: walletController.getCoinBalanceStream(),
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
                       EtherAmount _balance = snapshot.data!;
@@ -47,7 +47,7 @@ class _WalletPageState extends State<WalletPage> {
                         style: Theme.of(context).textTheme.headline2,
                       );
                     }
-                    return CircularProgressIndicator();
+                    return const CircularProgressIndicator();
                   }),
             ),
           ),
@@ -56,12 +56,12 @@ class _WalletPageState extends State<WalletPage> {
           GestureDetector(
             child: Chip(
               label: Text(
-                appController.getWalletShortFormat(wallet: '${appController.wallet}'),
+                walletController.getWalletShortFormat(wallet: '${walletController.wallet}'),
               ),
             ),
             onTap: () {
               // copy wallet address
-              FlutterClipboard.copy('${appController.wallet}').then((value) {
+              FlutterClipboard.copy('${walletController.wallet}').then((value) {
                 ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                   content: Text("Wallet address copied!"),
                   duration: Duration(seconds: 2),
@@ -72,19 +72,19 @@ class _WalletPageState extends State<WalletPage> {
 
           // get ETH fron Faucet contract
           ListTile(
-            leading: Icon(Icons.currency_bitcoin_outlined),
-            title: Text("Get ETH from Faucet"),
+            leading: const Icon(Icons.currency_bitcoin_outlined),
+            title: const Text("Get ETH from Faucet"),
             onTap: () async {
               log("Faucet");
-              await appController.readFaucetContract();
-              await appController.callFaucetWithdraw();
+              await faucetContractController.readFaucetContract();
+              await faucetContractController.callFaucetWithdraw(credentials: walletController.credentials);
             },
           ),
 
           // swap ETH with Clam Coin
           ListTile(
-            leading: Icon(Icons.currency_exchange),
-            title: Text("Swap CLAM Token"),
+            leading: const Icon(Icons.currency_exchange),
+            title: const Text("Swap CLAM Token"),
             onTap: () {
               log("Buy Clam Token");
             },
@@ -92,12 +92,12 @@ class _WalletPageState extends State<WalletPage> {
 
           // send coin
           ListTile(
-            leading: Icon(Icons.currency_exchange),
-            title: Text("Send ETH"),
+            leading: const Icon(Icons.currency_exchange),
+            title: const Text("Send ETH"),
             onTap: () async {
               log("Send Coin");
               final result =
-                  await appController.sendCoin(to: '0x57ceAFF4353D196ebD5f72f88dc62C1E9A37aF8f', amount: '0.5');
+                  await walletController.sendCoin(to: '0x57ceAFF4353D196ebD5f72f88dc62C1E9A37aF8f', amount: '0.5');
               log('send coint = $result');
             },
           ),

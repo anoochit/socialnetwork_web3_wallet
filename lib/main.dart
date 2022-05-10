@@ -2,6 +2,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:snwallet/controllers/app_controller.dart';
+import 'package:snwallet/controllers/faucet_controller.dart';
+import 'package:snwallet/controllers/wallet_controller.dart';
 import 'package:snwallet/pages/create_wallet.dart';
 import 'package:snwallet/pages/home.dart';
 import 'package:snwallet/pages/signin.dart';
@@ -23,7 +25,9 @@ Future<void> main() async {
 class MyApp extends StatelessWidget {
   MyApp({Key? key}) : super(key: key);
 
-  AppController appController = Get.put(AppController());
+  final AppController appController = Get.put(AppController());
+  final WalletController walletController = Get.put(WalletController());
+  final FaucetContractController faucetContractController = Get.put(FaucetContractController());
 
   @override
   Widget build(BuildContext context) {
@@ -32,10 +36,10 @@ class MyApp extends StatelessWidget {
       themeMode: ThemeMode.dark,
       home: SignInPage(),
       routes: {
-        '/home': (context) => HomePage(),
+        '/home': (context) => const HomePage(),
         '/signin': (context) => SignInPage(),
-        '/create_wallet': (context) => CreateWalletPage(),
-        '/wallet': (context) => WalletPage(),
+        '/create_wallet': (context) => const CreateWalletPage(),
+        '/wallet': (context) => const WalletPage(),
       },
     );
   }

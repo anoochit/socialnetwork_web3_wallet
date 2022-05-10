@@ -5,12 +5,15 @@ import 'package:flutter/material.dart';
 import 'package:flutterfire_ui/auth.dart';
 import 'package:get/get.dart';
 import 'package:snwallet/controllers/app_controller.dart';
+import 'package:snwallet/controllers/wallet_controller.dart';
 import 'package:snwallet/pages/home.dart';
 
 class SignInPage extends StatelessWidget {
   SignInPage({Key? key}) : super(key: key);
 
-  AppController appController = Get.find<AppController>();
+  final AppController appController = Get.find<AppController>();
+
+  final WalletController walletController = Get.find<WalletController>();
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +36,7 @@ class SignInPage extends StatelessWidget {
                   // load user info
                   appController.getUser(uid: state.user!.uid);
                   // if wallet exist load wallet
-                  appController.getWalletData();
+                  walletController.getWalletData();
                 }),
               ),
               AuthStateChangeAction<UserCreated>(
@@ -55,9 +58,9 @@ class SignInPage extends StatelessWidget {
         // load user data when already login
         appController.getUser(uid: FirebaseAuth.instance.currentUser!.uid);
         // if wallet exist load wallet
-        appController.getWalletData();
+        walletController.getWalletData();
         // user already signin goto home page
-        return HomePage();
+        return const HomePage();
       },
     );
   }

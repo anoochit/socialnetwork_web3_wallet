@@ -2,6 +2,7 @@ import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:snwallet/controllers/app_controller.dart';
+import 'package:snwallet/controllers/wallet_controller.dart';
 import 'package:snwallet/utils.dart';
 
 class CreateWalletPage extends StatefulWidget {
@@ -12,7 +13,7 @@ class CreateWalletPage extends StatefulWidget {
 }
 
 class _CreateWalletPageState extends State<CreateWalletPage> {
-  AppController appController = Get.find<AppController>();
+  WalletController walletController = Get.find<WalletController>();
 
   TextEditingController seedTextController = TextEditingController();
 
@@ -20,63 +21,65 @@ class _CreateWalletPageState extends State<CreateWalletPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Create Wallet"),
+        title: const Text("Create Wallet"),
       ),
-      body: GetBuilder<AppController>(
-          init: AppController(),
-          builder: (appController) {
+      body: GetBuilder<WalletController>(
+          init: WalletController(),
+          builder: (walletController) {
             return Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   // Instruction
-                  (appController.seed.isNotEmpty) ? Text("Please backup your seed words in safe place.") : Container(),
+                  (walletController.seed.isNotEmpty)
+                      ? const Text("Please backup your seed words in safe place.")
+                      : Container(),
 
                   // menonic code
-                  (appController.seed.isNotEmpty)
+                  (walletController.seed.isNotEmpty)
                       ? Padding(
                           padding: const EdgeInsets.all(16.0),
                           child: Container(
-                            padding: EdgeInsets.all(16.0),
+                            padding: const EdgeInsets.all(16.0),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(12.0),
                               border: Border.all(),
                             ),
-                            child: Text('${appController.seed}'),
+                            child: Text('${walletController.seed}'),
                           ),
                         )
                       : Container(),
 
-                  (appController.seed.isNotEmpty)
+                  (walletController.seed.isNotEmpty)
                       ? ElevatedButton(
                           onPressed: () {
-                            FlutterClipboard.copy('${appController.seed}').then((value) {
+                            FlutterClipboard.copy('${walletController.seed}').then((value) {
                               ScaffoldMessenger.of(context)
                                   .showSnackBar(const SnackBar(content: Text("Copied seed words to clipboard")));
                             });
                             Get.back();
                           },
-                          child: Text("Copy to clip board"))
+                          child: const Text("Copy to clip board"))
                       : Container(),
 
                   // Create wallet
-                  (appController.seed.isEmpty)
+                  (walletController.seed.isEmpty)
                       ? ElevatedButton(
                           onPressed: () {
-                            appController.walletExist().then((exist) async {
+                            walletController.walletExist().then((exist) async {
                               // if wallet exist
                               if (!exist) {
                                 // create new wallet
-                                await appController.createWallet();
+                                await walletController.createWallet();
                               }
                             });
                           },
-                          child: Text("Create Wallet"),
+                          child: const Text("Create Wallet"),
                         )
                       : Container(),
 
                   // Import private key
-                  (appController.seed.isEmpty)
+                  (walletController.seed.isEmpty)
                       ? ElevatedButton(
                           onPressed: () {
                             // show dialog with text input
@@ -84,33 +87,36 @@ class _CreateWalletPageState extends State<CreateWalletPage> {
                                 context: context,
                                 builder: (context) {
                                   return AlertDialog(
-                                    title: Text("Import Wallet"),
+                                    title: const Text("Import Wallet"),
                                     content: TextFormField(
                                       controller: seedTextController,
-                                      decoration: InputDecoration(hintText: 'paste your seed words'),
+                                      decoration: const InputDecoration(hintText: 'paste your seed words'),
                                     ),
                                     actions: [
                                       TextButton(
                                         onPressed: () async {
                                           // create wallet with seed words
-                                          await appController.createWallet(mnemonic: seedTextController.text.trim());
+                                          if (seedTextController.text.trim().isNotEmpty) {
+                                            await walletController.createWallet(
+                                                mnemonic: seedTextController.text.trim());
+                                          }
                                           // go back
                                           Get.back(closeOverlays: true);
                                         },
-                                        child: Text("Import"),
+                                        child: const Text("Import"),
                                       ),
                                       TextButton(
                                         onPressed: () {
                                           // go back
                                           Get.back(closeOverlays: true);
                                         },
-                                        child: Text("Cancel"),
+                                        child: const Text("Cancel"),
                                       ),
                                     ],
                                   );
                                 });
                           },
-                          child: Text("Import Wallet"),
+                          child: const Text("Import Wallet"),
                         )
                       : Container()
                 ],
