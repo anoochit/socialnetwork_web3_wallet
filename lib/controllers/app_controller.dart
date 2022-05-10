@@ -8,12 +8,12 @@ class AppController extends GetxController {
   RxString uid = "".obs;
   RxString displayName = "".obs;
 
-  final FirebaseFirestore firebase = FirebaseFirestore.instance;
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
   final FirebaseAuth auth = FirebaseAuth.instance;
 
   // Create user data in FireStore
   createUser({required String uid, required String displayName}) {
-    firebase.collection('users').doc(uid).set({
+    firestore.collection('users').doc(uid).set({
       'uid': uid,
       'displayName': displayName,
       'type': 'u',
@@ -29,7 +29,7 @@ class AppController extends GetxController {
 
   // Update user data in FireStore
   updateUser({required String displayName}) {
-    firebase.collection('users').doc(auth.currentUser!.uid).update({
+    firestore.collection('users').doc(auth.currentUser!.uid).update({
       'displayName': displayName,
       'updated': DateTime.now(),
     }).then((value) {
@@ -42,19 +42,23 @@ class AppController extends GetxController {
 
   // update user wallet
   updateUserWallet({required String wallet}) {
-    firebase.collection('users').doc(auth.currentUser!.uid).update({
+    firestore.collection('users').doc(auth.currentUser!.uid).update({
       'wallet': wallet,
     });
   }
 
   // Get user data in FireStore
-  getUser({required String uid}) {
-    firebase.collection('users').doc(uid).get().then((user) {
-      log('user docId =' + user.id);
+  getCurrentUserData({required String uid}) {
+    firestore.collection('users').doc(uid).get().then((user) {
+      log('user uid = ' + user.id);
       // set user data
       this.uid.value = user['uid'];
       displayName.value = user['displayName'];
       update();
     });
+  }
+
+  Future<DocumentSnapshot> getUserData({required String uid}) async {
+    return await firestore.collection("users").doc(uid).get(const GetOptions(source: Source.cache));
   }
 }

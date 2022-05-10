@@ -32,6 +32,9 @@ class WalletController extends GetxController {
       wallet.value = '';
       seed.value = '';
       update();
+      return true;
+    }).catchError((catchError) {
+      return false;
     });
   }
 
@@ -115,7 +118,7 @@ class WalletController extends GetxController {
   // get coin balance stream
   Stream<EtherAmount> getCoinBalanceStream() async* {
     while (true) {
-      await Future.delayed(const Duration(seconds: 5));
+      await Future.delayed(const Duration(seconds: 3));
       EtherAmount balance = await getCoinBalance();
       yield balance;
     }

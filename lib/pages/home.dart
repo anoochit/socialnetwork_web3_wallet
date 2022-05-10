@@ -18,10 +18,23 @@ class _HomePageState extends State<HomePage> {
   AppController appController = Get.find<AppController>();
 
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(_listTitle[_currentIndex]),
+        actions: [
+          (_currentIndex == 0)
+              ? IconButton(
+                  onPressed: () => Get.toNamed('/create_post'),
+                  icon: const Icon(Icons.add_comment),
+                )
+              : Container(),
+        ],
       ),
       body: IndexedStack(
         index: _currentIndex,
@@ -66,6 +79,16 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
+      // floatingActionButton: (_currentIndex == 0)
+      //     ? FloatingActionButton(
+      //         onPressed: () {
+      //           // write post
+      //           log("create post");
+      //           Get.toNamed("/create_post");
+      //         },
+      //         child: const Icon(Icons.add_comment),
+      //       )
+      //     : Container(),
     );
   }
 }

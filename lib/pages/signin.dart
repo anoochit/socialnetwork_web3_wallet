@@ -34,7 +34,7 @@ class SignInPage extends StatelessWidget {
                 ((context, state) {
                   log('User id = ${state.user!.uid}');
                   // load user info
-                  appController.getUser(uid: state.user!.uid);
+                  appController.getCurrentUserData(uid: state.user!.uid);
                   // if wallet exist load wallet
                   walletController.getWalletData();
                 }),
@@ -56,7 +56,7 @@ class SignInPage extends StatelessWidget {
         }
 
         // load user data when already login
-        appController.getUser(uid: FirebaseAuth.instance.currentUser!.uid);
+        appController.getCurrentUserData(uid: FirebaseAuth.instance.currentUser!.uid);
         // if wallet exist load wallet
         walletController.getWalletData();
         // user already signin goto home page

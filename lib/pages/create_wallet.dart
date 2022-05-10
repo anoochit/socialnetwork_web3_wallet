@@ -1,9 +1,7 @@
 import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:snwallet/controllers/app_controller.dart';
 import 'package:snwallet/controllers/wallet_controller.dart';
-import 'package:snwallet/utils.dart';
 
 class CreateWalletPage extends StatefulWidget {
   const CreateWalletPage({Key? key}) : super(key: key);
