@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:snwallet/controllers/app_controller.dart';
+import 'package:snwallet/controllers/wallet_controller.dart';
 import 'package:snwallet/models/post.dart';
 import 'package:snwallet/widgets/displayname.dart';
 
@@ -19,6 +20,7 @@ class PostCard extends StatelessWidget {
   final QueryDocumentSnapshot<PostModel> post;
 
   final AppController appController = Get.find<AppController>();
+  final WalletController walletController = Get.find<WalletController>();
 
   @override
   Widget build(BuildContext context) {
@@ -78,6 +80,38 @@ class PostCard extends StatelessWidget {
               TextButton.icon(
                 onPressed: () {
                   // donate post
+                  appController.getUserData(uid: post['uid']).then((user) {
+                    if (appController.uid != user['uid']) {
+                      showDialog(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              title: const Text("Donate 0.1 ETH"),
+                              content: Text(
+                                'Do you want to donate 0.1 ETH to ${user['displayName']} ?',
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Get.back();
+                                  },
+                                  child: const Text("Cancel"),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    // donate 0.1 ETH
+                                    walletController
+                                        .sendCoin(to: user['wallet'], amount: '0.1')
+                                        .then((value) => log('tx = $value'));
+                                    Get.back();
+                                  },
+                                  child: const Text("Donate"),
+                                ),
+                              ],
+                            );
+                          });
+                    }
+                  });
                 },
                 icon: const Icon(
                   Icons.attach_money,
