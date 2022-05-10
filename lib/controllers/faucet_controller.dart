@@ -19,7 +19,7 @@ class FaucetContractController extends GetxController {
 
   readFaucetContract() async {
     // get abi
-    abiCode = await rootBundle.loadString('lib/faucet.abi.json');
+    abiCode = await rootBundle.loadString('lib/generated/faucet.abi.json');
 
     // get contract
     contractAddr = EthereumAddress.fromHex(faucetContractAddress);
