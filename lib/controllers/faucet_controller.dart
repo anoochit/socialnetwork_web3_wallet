@@ -3,7 +3,7 @@ import 'dart:developer';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart';
-import 'package:snwallet/abi/faucet.g.dart';
+import 'package:snwallet/generated/faucet.g.dart';
 import 'package:snwallet/const.dart';
 import 'package:web3dart/web3dart.dart';
 
