@@ -54,36 +54,39 @@ class _WalletPageState extends State<WalletPage> {
               });
             },
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 4),
 
           // ETH balance
-          Card(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const Center(
-                    child: Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Text("Balance (ETH)"),
-                )),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Center(
-                    child: StreamBuilder<EtherAmount>(
-                        stream: walletController.getCoinBalanceStream(),
-                        builder: (context, snapshot) {
-                          if (snapshot.hasData) {
-                            EtherAmount _balance = snapshot.data!;
-                            return Text(
-                              fmt.format(_balance.getValueInUnit(EtherUnit.ether)),
-                              style: Theme.of(context).textTheme.headline3,
-                            );
-                          }
-                          return const CircularProgressIndicator();
-                        }),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Card(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const Center(
+                      child: Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Text("Balance (ETH)"),
+                  )),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Center(
+                      child: StreamBuilder<EtherAmount>(
+                          stream: walletController.getCoinBalanceStream(),
+                          builder: (context, snapshot) {
+                            if (snapshot.hasData) {
+                              EtherAmount _balance = snapshot.data!;
+                              return Text(
+                                fmt.format(_balance.getValueInUnit(EtherUnit.ether)),
+                                style: Theme.of(context).textTheme.headline3,
+                              );
+                            }
+                            return const CircularProgressIndicator();
+                          }),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
 
