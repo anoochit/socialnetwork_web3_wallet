@@ -1,7 +1,6 @@
 import 'dart:developer';
 
 import 'package:clipboard/clipboard.dart';
-import 'package:ethers/ethers.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -148,11 +147,7 @@ class _WalletPageState extends State<WalletPage> {
               log("Sell GIFT Token");
               // approve swap contract can spend your GIFT token
               await giftTokenController
-                  .callApprove(
-                swapTokenController.contractAddr,
-                walletController.credentials,
-                '1.0',
-              )
+                  .callApprove(swapTokenController.contractAddr, walletController.credentials, '1.0')
                   .then((value) async {
                 log('tx = $value');
                 // sell GIFT Token
@@ -176,12 +171,27 @@ class _WalletPageState extends State<WalletPage> {
                   .catchError((onError) => log('$onError'));
             },
           ),
+
           // send GIFT Token
           ListTile(
             leading: const Icon(Icons.redeem),
             title: const Text("Send GIFT"),
             onTap: () async {
               log("Send GIFT");
+
+              await giftTokenController
+                  .callApprove(giftTokenController.contractAddr, walletController.credentials, '1.0')
+                  .then((value) {
+                log('tx = $value');
+                // send GIFT Token
+                giftTokenController
+                    .callSendGift(
+                        to: EthereumAddress.fromHex('0x57ceAFF4353D196ebD5f72f88dc62C1E9A37aF8f'),
+                        credentials: walletController.credentials,
+                        amount: '1.0')
+                    .then((value) => log('tx = $value'))
+                    .catchError((onError) => log('$onError'));
+              }).catchError((onError) => log('$onError'));
             },
           ),
         ],

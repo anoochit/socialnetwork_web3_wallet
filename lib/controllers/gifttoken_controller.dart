@@ -5,6 +5,7 @@ import 'package:http/http.dart';
 import 'package:snwallet/const.dart';
 import 'package:snwallet/generated/gift.g.dart';
 import 'package:web3dart/web3dart.dart';
+import 'package:web_socket_channel/io.dart';
 
 class GiftTokenController extends GetxController {
   // gift contract
@@ -29,13 +30,12 @@ class GiftTokenController extends GetxController {
     contract = DeployedContract(ContractAbi.fromJson(abiCode, 'Gift'), contractAddr);
 
     // connect to contract
-    ethClient = Web3Client(rpcUrl, Client());
+    //ethClient = Web3Client(rpcUrl, Client());
+    ethClient = Web3Client(rpcUrl, Client(), socketConnector: () {
+      return IOWebSocketChannel.connect(wsUrl).cast<String>();
+    });
     gift = Gift(address: contractAddr, client: ethClient);
   }
-
-  // Future<List<dynamic>> callBalanceOf({required String address}) async {
-  //   return await ethClient.call(contract: contract, function: balanceOf, params: [EthereumAddress.fromHex(address)]);
-  // }
 
   Future<BigInt> callBalanceOf({required String address}) async {
     return await gift.balanceOf(EthereumAddress.fromHex(address));
@@ -47,5 +47,13 @@ class GiftTokenController extends GetxController {
       ethers.utils.parseEther(amount),
       credentials: credentials,
     );
+  }
+
+  Future<String> callSendGift({
+    required EthereumAddress to,
+    required Credentials credentials,
+    required String amount,
+  }) async {
+    return gift.transfer(to, ethers.utils.parseEther(amount), credentials: credentials);
   }
 }

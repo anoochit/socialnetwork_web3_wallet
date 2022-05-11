@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:ethers/ethers.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';

@@ -111,7 +111,9 @@ class WalletController extends GetxController {
 
   // get coin balance
   Future<EtherAmount> getCoinBalance() async {
-    Web3Client ethClient = Web3Client(rpcUrl, Client());
+    final Web3Client ethClient = Web3Client(rpcUrl, Client(), socketConnector: () {
+      return IOWebSocketChannel.connect(wsUrl).cast<String>();
+    });
     return await ethClient.getBalance(credentials.address);
   }
 
@@ -126,7 +128,7 @@ class WalletController extends GetxController {
 
   // send coin
   Future<String> sendCoin({required String to, required String amount}) async {
-    Web3Client ethClient = Web3Client(rpcUrl, Client(), socketConnector: () {
+    final Web3Client ethClient = Web3Client(rpcUrl, Client(), socketConnector: () {
       return IOWebSocketChannel.connect(wsUrl).cast<String>();
     });
 
