@@ -121,10 +121,10 @@ class PostCard extends StatelessWidget {
                 label: const Text("Donate"),
               ),
 
-              // donate post
+              // send gift
               TextButton.icon(
                 onPressed: () {
-                  // donate post
+                  // send gift
                   log("send gift token");
                 },
                 icon: const Icon(
