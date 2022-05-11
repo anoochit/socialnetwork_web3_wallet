@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:snwallet/controllers/app_controller.dart';
 import 'package:snwallet/controllers/faucet_controller.dart';
+import 'package:snwallet/controllers/gifttoken_controller.dart';
 import 'package:snwallet/controllers/post_controller.dart';
+import 'package:snwallet/controllers/swap_controller.dart';
 import 'package:snwallet/controllers/wallet_controller.dart';
 import 'package:snwallet/pages/create_post.dart';
 import 'package:snwallet/pages/create_wallet.dart';
@@ -39,6 +41,8 @@ class MyApp extends StatelessWidget {
   final WalletController walletController = Get.put(WalletController());
   final PostController postController = Get.put(PostController());
   final FaucetContractController faucetContractController = Get.put(FaucetContractController());
+  final GiftTokenController giftTokenController = Get.put(GiftTokenController());
+  final SwapTokenController swapTokenController = Get.put(SwapTokenController());
 
   @override
   Widget build(BuildContext context) {

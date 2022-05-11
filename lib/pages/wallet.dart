@@ -1,11 +1,14 @@
 import 'dart:developer';
 
 import 'package:clipboard/clipboard.dart';
+import 'package:ethers/ethers.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:snwallet/controllers/app_controller.dart';
 import 'package:snwallet/controllers/faucet_controller.dart';
+import 'package:snwallet/controllers/gifttoken_controller.dart';
+import 'package:snwallet/controllers/swap_controller.dart';
 import 'package:snwallet/controllers/wallet_controller.dart';
 import 'package:web3dart/web3dart.dart';
 
@@ -20,6 +23,8 @@ class _WalletPageState extends State<WalletPage> {
   AppController appController = Get.find<AppController>();
   WalletController walletController = Get.find<WalletController>();
   FaucetContractController faucetContractController = Get.find<FaucetContractController>();
+  GiftTokenController giftTokenController = Get.find<GiftTokenController>();
+  SwapTokenController swapTokenController = Get.find<SwapTokenController>();
 
   final fmt = NumberFormat("#,##0.00", "en_US");
 
@@ -76,8 +81,9 @@ class _WalletPageState extends State<WalletPage> {
             title: const Text("Get ETH from Faucet"),
             onTap: () async {
               log("Faucet");
-              await faucetContractController.readFaucetContract();
-              await faucetContractController.callFaucetWithdraw(credentials: walletController.credentials);
+              await faucetContractController
+                  .callFaucetWithdraw(credentials: walletController.credentials)
+                  .catchError((onError) => log('$onError'));
             },
           ),
 
@@ -87,23 +93,89 @@ class _WalletPageState extends State<WalletPage> {
             title: const Text("Send ETH"),
             onTap: () async {
               log("Send Coin");
-              final result = await walletController.sendCoin(
-                to: '0x57ceAFF4353D196ebD5f72f88dc62C1E9A37aF8f',
-                amount: '0.5',
-              );
-              log('result = $result');
+              final result = await walletController
+                  .sendCoin(to: '0x57ceAFF4353D196ebD5f72f88dc62C1E9A37aF8f', amount: '0.5')
+                  .catchError((onError) => log('$onError'));
+
+              log('result tx = $result');
             },
           ),
 
-          // swap ETH with Clam Coin
+          // Swap GIFT balance
           ListTile(
             leading: const Icon(Icons.currency_exchange),
-            title: const Text("Swap GIFT Token"),
-            onTap: () {
-              log("Swap GIFT Token, call swap contract to swap ETH and GIFT token");
+            title: const Text("Swap GIFT balance"),
+            onTap: () async {
+              log("Swap GIFT balance");
+              await swapTokenController
+                  .callTokenSupply()
+                  .then((value) => log('Swap GIFT balance = $value'))
+                  .catchError((onError) => log('$onError'));
             },
           ),
 
+          // Swap ETH balance
+          ListTile(
+            leading: const Icon(Icons.currency_exchange),
+            title: const Text("Swap ETH balance"),
+            onTap: () async {
+              log("Swap ETH balance");
+              await swapTokenController
+                  .callCoinSupply()
+                  .then((value) => log('Swap ETH balance = $value'))
+                  .catchError((onError) => log('$onError'));
+            },
+          ),
+
+          // Buy GIFT Token
+          ListTile(
+            leading: const Icon(Icons.currency_exchange),
+            title: const Text("Buy GIFT Token"),
+            onTap: () async {
+              log("Buy GIFT Token");
+              await swapTokenController
+                  .callBuyToken(credentials: walletController.credentials, amount: '1.0')
+                  .then((value) => log('$value'))
+                  .catchError((onError) => log('$onError'));
+            },
+          ),
+
+          // Buy GIFT Token
+          ListTile(
+            leading: const Icon(Icons.currency_exchange),
+            title: const Text("Sell GIFT Token"),
+            onTap: () async {
+              log("Sell GIFT Token");
+              // approve swap contract can spend your GIFT token
+              await giftTokenController
+                  .callApprove(
+                swapTokenController.contractAddr,
+                walletController.credentials,
+                '1.0',
+              )
+                  .then((value) async {
+                log('tx = $value');
+                // sell GIFT Token
+                await swapTokenController
+                    .callSellToken(credentials: walletController.credentials, amount: '1.0')
+                    .then((value) => log('tx = $value'))
+                    .catchError((onError) => log('$onError'));
+              });
+            },
+          ),
+
+          // Balance of GIFT Token
+          ListTile(
+            leading: const Icon(Icons.redeem),
+            title: const Text("Balance of GIFT"),
+            onTap: () async {
+              log("Balance of GIFT");
+              await giftTokenController
+                  .callBalanceOf(address: walletController.wallet.value)
+                  .then((value) => log('GIFT Balance = $value'))
+                  .catchError((onError) => log('$onError'));
+            },
+          ),
           // send GIFT Token
           ListTile(
             leading: const Icon(Icons.redeem),

@@ -17,6 +17,10 @@ class FaucetContractController extends GetxController {
   late EthereumAddress contractAddr;
   late Faucet faucet;
 
+  FaucetContractController() {
+    readFaucetContract();
+  }
+
   readFaucetContract() async {
     // get abi
     abiCode = await rootBundle.loadString('lib/generated/faucet.abi.json');
@@ -26,7 +30,7 @@ class FaucetContractController extends GetxController {
     contract = DeployedContract(ContractAbi.fromJson(abiCode, 'Faucet'), contractAddr);
 
     // set contract function
-    withdrawFunction = contract.function('withdraw');
+    //withdrawFunction = contract.function('withdraw');
 
     // connect to contract
     final Web3Client ethClient = Web3Client(rpcUrl, Client());
