@@ -25,8 +25,12 @@ Future<void> main() async {
 // mnemonic
 // emulator 1 = scale habit artwork bag mail electric demand section evoke cost promote wonder
 // wallet = 0xc5b10168cc35b8bc4042c4b529bfbb2052772d14
+
 // emulator 2 = thunder enjoy cruise bomb west swim neglect connect check defy cereal sick
 // wallet = 0x76cfc02cfe0f5a9e10b827227b3b1cf550061ad9
+
+// Swap Contract = 0x3a410440bb4901945a6A8feea64579ADa82E3224
+// GIFT Token Contract = 0x7ec58138acB343DeBcf7806F25f1583CBC65cda8
 
 class MyApp extends StatelessWidget {
   MyApp({Key? key}) : super(key: key);
