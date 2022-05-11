@@ -179,19 +179,14 @@ class _WalletPageState extends State<WalletPage> {
             onTap: () async {
               log("Send GIFT");
 
-              await giftTokenController
-                  .callApprove(giftTokenController.contractAddr, walletController.credentials, '1.0')
-                  .then((value) {
-                log('tx = $value');
-                // send GIFT Token
-                giftTokenController
-                    .callSendGift(
-                        to: EthereumAddress.fromHex('0x57ceAFF4353D196ebD5f72f88dc62C1E9A37aF8f'),
-                        credentials: walletController.credentials,
-                        amount: '1.0')
-                    .then((value) => log('tx = $value'))
-                    .catchError((onError) => log('$onError'));
-              }).catchError((onError) => log('$onError'));
+              // send GIFT Token
+              giftTokenController
+                  .callSendGift(
+                      to: EthereumAddress.fromHex('0x57ceAFF4353D196ebD5f72f88dc62C1E9A37aF8f'),
+                      credentials: walletController.credentials,
+                      amount: '1.0')
+                  .then((value) => log('tx = $value'))
+                  .catchError((onError) => log('$onError'));
             },
           ),
         ],
