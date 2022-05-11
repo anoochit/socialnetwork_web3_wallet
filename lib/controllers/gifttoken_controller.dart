@@ -41,6 +41,15 @@ class GiftTokenController extends GetxController {
     return await gift.balanceOf(EthereumAddress.fromHex(address));
   }
 
+  // get coin balance stream
+  Stream<BigInt> getGiftBalanceStream({required String address}) async* {
+    while (true) {
+      await Future.delayed(const Duration(seconds: 5));
+      BigInt balance = await callBalanceOf(address: address);
+      yield balance;
+    }
+  }
+
   Future<String> callApprove(EthereumAddress spender, Credentials credentials, String amount) async {
     return await gift.approve(
       spender,

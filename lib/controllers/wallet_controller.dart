@@ -120,7 +120,7 @@ class WalletController extends GetxController {
   // get coin balance stream
   Stream<EtherAmount> getCoinBalanceStream() async* {
     while (true) {
-      await Future.delayed(const Duration(seconds: 3));
+      await Future.delayed(const Duration(seconds: 5));
       EtherAmount balance = await getCoinBalance();
       yield balance;
     }

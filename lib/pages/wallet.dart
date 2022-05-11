@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:clipboard/clipboard.dart';
+import 'package:ethers/ethers.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -35,27 +36,7 @@ class _WalletPageState extends State<WalletPage> {
       ),
       body: ListView(
         children: [
-          const SizedBox(height: 24),
-          // balance
-          const Center(child: Text("Balance (ETH)")),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Center(
-              child: StreamBuilder<EtherAmount>(
-                  stream: walletController.getCoinBalanceStream(),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData) {
-                      EtherAmount _balance = snapshot.data!;
-                      return Text(
-                        fmt.format(_balance.getValueInUnit(EtherUnit.ether)),
-                        style: Theme.of(context).textTheme.headline2,
-                      );
-                    }
-                    return const CircularProgressIndicator();
-                  }),
-            ),
-          ),
-
+          const SizedBox(height: 8),
           // wallet address
           GestureDetector(
             child: Chip(
@@ -72,6 +53,38 @@ class _WalletPageState extends State<WalletPage> {
                 ));
               });
             },
+          ),
+          const SizedBox(height: 8),
+
+          // ETH balance
+          Card(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const Center(
+                    child: Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text("Balance (ETH)"),
+                )),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Center(
+                    child: StreamBuilder<EtherAmount>(
+                        stream: walletController.getCoinBalanceStream(),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData) {
+                            EtherAmount _balance = snapshot.data!;
+                            return Text(
+                              fmt.format(_balance.getValueInUnit(EtherUnit.ether)),
+                              style: Theme.of(context).textTheme.headline3,
+                            );
+                          }
+                          return const CircularProgressIndicator();
+                        }),
+                  ),
+                ),
+              ],
+            ),
           ),
 
           // get ETH fron Faucet contract
@@ -155,7 +168,7 @@ class _WalletPageState extends State<WalletPage> {
                     .callSellToken(credentials: walletController.credentials, amount: '1.0')
                     .then((value) => log('tx = $value'))
                     .catchError((onError) => log('$onError'));
-              });
+              }).catchError((onError) => log('$onError'));
             },
           ),
 
