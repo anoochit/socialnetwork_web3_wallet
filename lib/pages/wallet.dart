@@ -1,7 +1,6 @@
 import 'dart:developer';
 
 import 'package:clipboard/clipboard.dart';
-import 'package:ethers/ethers.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -116,28 +115,28 @@ class _WalletPageState extends State<WalletPage> {
             },
           ),
 
-          // Swap GIFT balance
+          // Swap GIFT supply
           ListTile(
             leading: const Icon(Icons.currency_exchange),
-            title: const Text("Swap GIFT balance"),
+            title: const Text("Swap GIFT supply"),
             onTap: () async {
-              log("Swap GIFT balance");
+              log("Swap GIFT supply");
               await swapTokenController
                   .callTokenSupply()
-                  .then((value) => log('Swap GIFT balance = $value'))
+                  .then((value) => log('Swap GIFT supply = $value'))
                   .catchError((onError) => log('$onError'));
             },
           ),
 
-          // Swap ETH balance
+          // Swap ETH supply
           ListTile(
             leading: const Icon(Icons.currency_exchange),
-            title: const Text("Swap ETH balance"),
+            title: const Text("Swap ETH supply"),
             onTap: () async {
-              log("Swap ETH balance");
+              log("Swap ETH supply");
               await swapTokenController
                   .callCoinSupply()
-                  .then((value) => log('Swap ETH balance = $value'))
+                  .then((value) => log('Swap ETH supply = $value'))
                   .catchError((onError) => log('$onError'));
             },
           ),
