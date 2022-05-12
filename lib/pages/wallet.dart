@@ -97,7 +97,7 @@ class _WalletPageState extends State<WalletPage> {
               log("Faucet");
               await faucetContractController
                   .callFaucetWithdraw(credentials: walletController.credentials)
-                  .catchError((onError) => log('$onError'));
+                  .then((value) => log(value));
             },
           ),
 
@@ -107,9 +107,10 @@ class _WalletPageState extends State<WalletPage> {
             title: const Text("Send ETH"),
             onTap: () async {
               log("Send Coin");
-              final result = await walletController
-                  .sendCoin(to: '0x57ceAFF4353D196ebD5f72f88dc62C1E9A37aF8f', amount: '0.5')
-                  .catchError((onError) => log('$onError'));
+              final result = await walletController.sendCoin(
+                to: '0x57ceAFF4353D196ebD5f72f88dc62C1E9A37aF8f',
+                amount: '0.5',
+              );
 
               log('result tx = $result');
             },
@@ -149,7 +150,7 @@ class _WalletPageState extends State<WalletPage> {
               log("Buy GIFT Token");
               await swapTokenController
                   .callBuyToken(credentials: walletController.credentials, amount: '1.0')
-                  .then((value) => log('$value'))
+                  .then((value) => log(value))
                   .catchError((onError) => log('$onError'));
             },
           ),
@@ -170,7 +171,7 @@ class _WalletPageState extends State<WalletPage> {
                     .callSellToken(credentials: walletController.credentials, amount: '1.0')
                     .then((value) => log('tx = $value'))
                     .catchError((onError) => log('$onError'));
-              }).catchError((onError) => log('$onError'));
+              });
             },
           ),
 
