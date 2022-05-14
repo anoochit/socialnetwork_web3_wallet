@@ -1,5 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutterfire_ui/firestore.dart';
 import 'package:get/get.dart';
 import 'package:snwallet/controllers/app_controller.dart';
 import 'package:snwallet/controllers/post_controller.dart';
@@ -14,45 +14,37 @@ class FeedPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: FirestoreQueryBuilder<PostModel>(
-          query: postController.getPostStream().orderBy('updated', descending: true),
-          builder: (context, snapshot, _) {
-            // is loading
-            if (snapshot.isFetching) {
-              return const CircularProgressIndicator();
-            }
-            // has error
-            if (snapshot.hasError) {
-              return Text('error ${snapshot.error}');
-            }
+    return StreamBuilder<QuerySnapshot<PostModel>>(
+      stream: postController.getPostStream().orderBy('updated', descending: true).snapshots(),
+      builder: (context, snapshot) {
+        // has error
+        if (snapshot.hasError) {
+          return Center(
+            child: Text('Error: ${snapshot.error}'),
+          );
+        }
 
-            return ListView.builder(
-              itemCount: snapshot.docs.length,
-              itemBuilder: (context, index) {
-                // if nit finish fetch more
-                if (snapshot.hasMore && index + 1 == snapshot.docs.length) {
-                  // fetch more
-                  snapshot.fetchMore();
-                }
+        // wait for the stream to be ready
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
 
-                // is empty
-                if (snapshot.docs.isEmpty) {
-                  return const Text('No posts');
-                }
+        if (snapshot.hasData) {
+          return ListView.builder(
+            itemCount: snapshot.data!.docs.length,
+            itemBuilder: (BuildContext context, int index) {
+              final post = snapshot.data!.docs[index];
+              return PostCard(post: post);
+            },
+          );
+        }
 
-                // has data
-                if (snapshot.hasData) {
-                  // get post item
-                  final post = snapshot.docs[index];
-
-                  return PostCard(post: post);
-                }
-
-                return const Center(child: CircularProgressIndicator());
-              },
-            );
-          }),
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      },
     );
   }
 }

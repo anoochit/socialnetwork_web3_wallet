@@ -17,9 +17,16 @@ class UserDisplayName extends StatelessWidget {
     return FutureBuilder<DocumentSnapshot>(
       future: appController.getUserData(uid: uid),
       builder: (context, snapshot) {
+        // has error
+        if (snapshot.hasError) {
+          return Text('Error: ${snapshot.error}');
+        }
+
+        // has data
         if (snapshot.hasData) {
           return Text(
             snapshot.data!['displayName'],
+            style: Theme.of(context).textTheme.headline6!.copyWith(fontSize: 16.0),
           );
         }
         return Container();

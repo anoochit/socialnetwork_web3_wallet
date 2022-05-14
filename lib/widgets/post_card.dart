@@ -5,9 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:snwallet/controllers/app_controller.dart';
+import 'package:snwallet/controllers/gifttoken_controller.dart';
 import 'package:snwallet/controllers/wallet_controller.dart';
 import 'package:snwallet/models/post.dart';
 import 'package:snwallet/widgets/displayname.dart';
+import 'package:web3dart/web3dart.dart';
 
 class PostCard extends StatelessWidget {
   PostCard({
@@ -19,6 +21,7 @@ class PostCard extends StatelessWidget {
 
   final AppController appController = Get.find<AppController>();
   final WalletController walletController = Get.find<WalletController>();
+  final GiftTokenController giftTokenController = Get.find<GiftTokenController>();
 
   @override
   Widget build(BuildContext context) {
@@ -126,6 +129,42 @@ class PostCard extends StatelessWidget {
                 onPressed: () {
                   // send gift
                   log("send gift token");
+                  appController.getUserData(uid: post['uid']).then((user) {
+                    if (appController.uid != user['uid']) {
+                      showDialog(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              title: const Text("Send Gift"),
+                              content: Text(
+                                'Do you want to send 1 GIFT to ${user['displayName']} ?',
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Get.back();
+                                  },
+                                  child: const Text("Cancel"),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    // send 1 GIFT
+                                    giftTokenController
+                                        .callSendGift(
+                                            to: EthereumAddress.fromHex(user['wallet']),
+                                            credentials: walletController.credentials,
+                                            amount: '1.0')
+                                        .then((value) => log('tx = $value'))
+                                        .catchError((onError) => log('$onError'));
+                                    Get.back();
+                                  },
+                                  child: const Text("Send"),
+                                ),
+                              ],
+                            );
+                          });
+                    }
+                  });
                 },
                 icon: const Icon(
                   Icons.redeem,
