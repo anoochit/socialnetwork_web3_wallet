@@ -132,7 +132,8 @@ class WalletController extends GetxController {
       return IOWebSocketChannel.connect(wsUrl).cast<String>();
     });
 
-    final result = await ethClient.sendTransaction(
+    final result = await ethClient
+        .sendTransaction(
       credentials,
       Transaction(
         to: EthereumAddress.fromHex(to),
@@ -140,7 +141,10 @@ class WalletController extends GetxController {
         maxGas: 100000,
         value: EtherAmount.fromUnitAndValue(EtherUnit.wei, ethers.utils.parseEther(amount)),
       ),
-    );
+    )
+        .catchError((error) {
+      return error.toString();
+    });
 
     log('transaction result = $result ');
 
