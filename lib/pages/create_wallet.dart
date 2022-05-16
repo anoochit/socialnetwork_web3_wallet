@@ -1,6 +1,7 @@
 import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ms_undraw/ms_undraw.dart';
 import 'package:snwallet/controllers/wallet_controller.dart';
 
 class CreateWalletPage extends StatefulWidget {
@@ -28,6 +29,16 @@ class _CreateWalletPageState extends State<CreateWalletPage> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  // Image
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.7,
+                    height: MediaQuery.of(context).size.width * 0.7,
+                    child: UnDraw(
+                      illustration: UnDrawIllustration.digital_currency,
+                      color: Colors.blue,
+                    ),
+                  ),
+
                   // Instruction
                   (walletController.seed.isNotEmpty)
                       ? const Text("Please backup your seed words in safe place.")
